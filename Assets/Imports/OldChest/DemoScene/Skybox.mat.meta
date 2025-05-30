@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c31efe829cfb55749aad6dac29e9b963
+timeCreated: 1441013310
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 20179
+  packageName: Animated Old Chest
+  packageVersion: 1.1
+  assetPath: Assets/OldChest/DemoScene/Skybox.mat
+  uploadId: 79327
