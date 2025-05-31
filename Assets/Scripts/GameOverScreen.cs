@@ -8,11 +8,13 @@ public class GameOverScreen : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public void RestartButton()
+    /* ------- UI button helpers (drag onto buttons) --------------- */
+    public void RestartScene()
     {
-        SceneManager.LoadScene("GameScene");
+        Globals.InitGlobals();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
-    public void MainMenuButton()
+    public void ReturnToMainMenu()
     {
         SceneManager.LoadScene("MainMenuScene");
     }

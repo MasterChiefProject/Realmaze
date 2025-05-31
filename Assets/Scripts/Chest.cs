@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class Chest : MonoBehaviour
 {
     public AudioClip openChestSound;
-    public Text notEnoughCoinsMessage; 
+    public Text notEnoughCoinsMessage;
     public bool isOpen = false;
     public int openAfterCoins = 20;
     public float keyDelay = 1.5f;
@@ -24,15 +24,21 @@ public class Chest : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if (Globals.points >= openAfterCoins)
+            if (Globals.points >= openAfterCoins && !isOpen)
             {
                 openChestAnimation.Play();
                 AudioSource.PlayClipAtPoint(openChestSound, transform.position, volume);
-                StartCoroutine(KeyAfterDelay(keyDelay));
-
-            } else
+                if (!Globals.hasKey)
+                {
+                    StartCoroutine(KeyAfterDelay(keyDelay));
+                }
+            }
+            else
             {
-                notEnoughCoinsMessage.gameObject.SetActive(true);
+                if (!isOpen)
+                {
+                    notEnoughCoinsMessage.gameObject.SetActive(true);
+                }
             }
         }
     }
