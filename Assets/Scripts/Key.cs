@@ -3,6 +3,9 @@ using UnityEngine;
 public class Key : MonoBehaviour
 {
     public Chest chest;
+    public AudioClip takeKeyAudio;
+    public float volume = 1f;
+
 
     private Animation animation;
 
@@ -20,7 +23,9 @@ public class Key : MonoBehaviour
     {
         if (other.CompareTag("Player") && chest.isOpen)
         {
-            // TODO: can take the key - destroy object, play sound, save this in Globals variable hasKey
+            AudioSource.PlayClipAtPoint(takeKeyAudio, transform.position, volume);
+            // TODO: show some text explaining where to go now
+            Destroy(gameObject);
         }
     }
 }

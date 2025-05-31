@@ -1,17 +1,22 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Chest : MonoBehaviour
 {
+    public AudioClip openChestSound;
+    public Text notEnoughCoinsMessage; 
     public bool isOpen = false;
     public int openAfterCoins = 20;
     public float keyDelay = 1.5f;
     public Key key;
+    public float volume = 1f;
 
     Animation openChestAnimation;
 
     private void Start()
     {
+        notEnoughCoinsMessage.gameObject.SetActive(false);
         openChestAnimation = GetComponent<Animation>();
     }
 
@@ -22,12 +27,21 @@ public class Chest : MonoBehaviour
             if (Globals.points >= openAfterCoins)
             {
                 openChestAnimation.Play();
+                AudioSource.PlayClipAtPoint(openChestSound, transform.position, volume);
                 StartCoroutine(KeyAfterDelay(keyDelay));
 
             } else
             {
-                // TODO: display a text
+                notEnoughCoinsMessage.gameObject.SetActive(true);
             }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            notEnoughCoinsMessage.gameObject.SetActive(false);
         }
     }
 
