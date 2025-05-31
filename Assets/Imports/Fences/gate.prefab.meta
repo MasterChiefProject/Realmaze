@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 05e127ba46a3ae04eacf83d589ca4873
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 11618
+  packageName: Medieval Fence Pack
+  packageVersion: 1
+  assetPath: Assets/Fences/gate.prefab
+  uploadId: 14880
