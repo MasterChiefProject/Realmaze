@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 18f52e9609c5ce84986850393c95338c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 11618
+  packageName: Medieval Fence Pack
+  packageVersion: 1
+  assetPath: Assets/Fences/fence_column.prefab
+  uploadId: 14880
