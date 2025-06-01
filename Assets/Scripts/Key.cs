@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Key : MonoBehaviour
 {
@@ -7,6 +9,9 @@ public class Key : MonoBehaviour
     public float volume = 1f;
     public GateController gate1;
     public GateController gate2;
+
+    public Text message;
+    public float hideMsgAfterDelay = 2f;
 
     private Animation animation;
 
@@ -28,8 +33,17 @@ public class Key : MonoBehaviour
             gate1.UnlockGate();
             gate2.UnlockGate();
             AudioSource.PlayClipAtPoint(takeKeyAudio, transform.position, volume);
-            // TODO: show some text explaining where to go now
+
+            message.text = "Now you can open the gate!";
+            message.gameObject.SetActive(true);
+
             Destroy(gameObject);
         }
+    }
+
+    private IEnumerator HideMessageAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        message.gameObject.SetActive(false);
     }
 }

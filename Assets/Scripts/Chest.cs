@@ -37,6 +37,8 @@ public class Chest : MonoBehaviour
             {
                 if (!isOpen)
                 {
+                    int coinsLack = openAfterCoins -  Globals.points;
+                    notEnoughCoinsMessage.text = "You don't have enough coins to open the chest.\nCollect " + coinsLack + " more coins.";
                     notEnoughCoinsMessage.gameObject.SetActive(true);
                 }
             }

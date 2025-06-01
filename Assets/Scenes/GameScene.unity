@@ -6646,8 +6646,8 @@ Transform:
   m_GameObject: {fileID: 1327410111}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.23972364, z: -0, w: 0.97084117}
-  m_LocalPosition: {x: 252.18, y: 21.74, z: 225.6}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 253.69, y: 19.8, z: 222.73}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 117818444}
@@ -10852,7 +10852,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1286888476952171621, guid: 8324063f09777e0469120190c5081ae0, type: 3}
       propertyPath: openAfterCoins
-      value: 1
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 1286888476952171621, guid: 8324063f09777e0469120190c5081ae0, type: 3}
       propertyPath: notEnoughCoinsMessage
@@ -10866,6 +10866,10 @@ PrefabInstance:
       propertyPath: gate2
       value: 
       objectReference: {fileID: 1041918467}
+    - target: {fileID: 2286371878321252484, guid: 8324063f09777e0469120190c5081ae0, type: 3}
+      propertyPath: message
+      value: 
+      objectReference: {fileID: 1554123689}
     - target: {fileID: 4115384244161862341, guid: 8324063f09777e0469120190c5081ae0, type: 3}
       propertyPath: m_Name
       value: Chest
@@ -11771,7 +11775,9 @@ GameObject:
   - component: {fileID: 4459864849734759785}
   - component: {fileID: 4459864849734759784}
   - component: {fileID: 4459864849734759791}
-  m_Layer: 0
+  - component: {fileID: 4459864849734759793}
+  - component: {fileID: 4459864849734759792}
+  m_Layer: 7
   m_Name: PlayerCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -11838,6 +11844,83 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &4459864849734759792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4459864849734759787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9a305e18de0c04dbd257a21cd47087, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sharedProfile: {fileID: 11400000, guid: da4b71856d4d43547ba74f5918337e18, type: 2}
+  isGlobal: 1
+  blendDistance: 0
+  weight: 1
+  priority: 0
+--- !u!114 &4459864849734759793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4459864849734759787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 948f4100a11a5c24981795d21301da5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  volumeTrigger: {fileID: 4459864849734759790}
+  volumeLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  stopNaNPropagation: 1
+  finalBlitToCameraTarget: 0
+  antialiasingMode: 0
+  temporalAntialiasing:
+    jitterSpread: 0.75
+    sharpness: 0.25
+    stationaryBlending: 0.95
+    motionBlending: 0.85
+  subpixelMorphologicalAntialiasing:
+    quality: 2
+  fastApproximateAntialiasing:
+    fastMode: 0
+    keepAlpha: 0
+  fog:
+    enabled: 1
+    excludeSkybox: 1
+  debugLayer:
+    lightMeter:
+      width: 512
+      height: 256
+      showCurves: 1
+    histogram:
+      width: 512
+      height: 256
+      channel: 3
+    waveform:
+      exposure: 0.12
+      height: 256
+    vectorscope:
+      size: 256
+      exposure: 0.12
+    overlaySettings:
+      linearDepth: 0
+      motionColorIntensity: 4
+      motionGridSize: 64
+      colorBlindnessType: 0
+      colorBlindnessStrength: 1
+  m_Resources: {fileID: 11400000, guid: d82512f9c8e5d4a4d938b575d47f88d4, type: 2}
+  m_ShowToolkit: 0
+  m_ShowCustomSorter: 0
+  breakBeforeColorGrading: 0
+  m_BeforeTransparentBundles: []
+  m_BeforeStackBundles: []
+  m_AfterStackBundles: []
 --- !u!222 &4459864849822615912
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -12172,7 +12255,7 @@ Transform:
   m_GameObject: {fileID: 4459864850520203261}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.98123205, z: -0, w: -0.19283088}
-  m_LocalPosition: {x: 240.32, y: 21.8, z: 226.86}
+  m_LocalPosition: {x: 112.2, y: 74.3, z: 137.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
