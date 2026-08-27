@@ -25,9 +25,15 @@ jobs:
             ASSET-NOTICE.md
             Assets/Editor
             Assets/Scripts/Chest.cs
+            Assets/Scripts/Coin.cs
+            Assets/Scripts/EscapeZone.cs
+            Assets/Scripts/GateController.cs
+            Assets/Scripts/Globals.cs
             Assets/Scripts/Key.cs
             Assets/Scripts/MainMenu.cs
             Assets/Scripts/PlayerDeathHandler.cs
+            Assets/Scripts/Score.cs
+            Assets/Scripts/VictoryScreen.cs
             Assets/Scripts/WayPointScript.cs
             Assets/Scripts/WebGLPerformanceBootstrap.cs
             Assets/WebGLTemplates

@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class VictoryScreen : MonoBehaviour
 {
@@ -8,6 +7,7 @@ public class VictoryScreen : MonoBehaviour
     {
         gameObject.SetActive(true);
     }
+
     public void ReturnToMainMenu()
     {
         SceneManager.LoadScene("MainMenuScene");

@@ -1,29 +1,45 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 public class EscapeZone : MonoBehaviour
 {
+    [FormerlySerializedAs("gameOverUI")]
+    [Tooltip("Canvas or panel that contains the Victory UI.")]
+    [SerializeField] private GameObject victoryUI;
 
-    [Tooltip("Canvas or panel that contains the Game-Over UI.")]
-    [SerializeField] GameObject gameOverUI;
+    private bool isWinner;
 
-    bool isWinner = false;
-
-    void Awake()
+    private void Awake()
     {
-        if (gameOverUI) gameOverUI.SetActive(false);
+        if (victoryUI)
+        {
+            victoryUI.SetActive(false);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isWinner) return;
-        if (!other.CompareTag("Player")) return;
+        if (isWinner || !other.CompareTag("Player"))
+        {
+            return;
+        }
 
         isWinner = true;
 
-        other.gameObject.tag = "Zombie";
+        PlayerDeathHandler deathHandler =
+            other.GetComponentInParent<PlayerDeathHandler>();
 
-        if (gameOverUI) gameOverUI.SetActive(true);
+        if (deathHandler)
+        {
+            deathHandler.enabled = false;
+        }
+
+        other.gameObject.tag = "Untagged";
+
+        if (victoryUI)
+        {
+            victoryUI.SetActive(true);
+        }
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
