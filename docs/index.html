@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Play Realmaze, a Unity 6 first-person escape game, directly in your browser.">
+    <meta name="color-scheme" content="dark light">
+    <title>Realmaze | WebGL</title>
+
+    <script>
+      try {
+        if (localStorage.getItem("realmaze-web-theme-v2") === "light") {
+          document.documentElement.dataset.theme = "light";
+        }
+      } catch (_) {}
+    </script>
+
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script defer src="TemplateData/shell.js"></script>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <div>
+        <span class="eyebrow">MASTERCHIEFPROJECT</span>
+        <h1>Realmaze</h1>
+        <p>Unity 6 escape game</p>
+      </div>
+
+      <div class="site-actions">
+        <button id="theme-toggle" class="shell-button" type="button">
+          Light mode
+        </button>
+        <a
+          class="shell-button shell-link"
+          href="https://github.com/MasterChiefProject/Realmaze"
+          target="_blank"
+          rel="noreferrer"
+        >Source</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="game-card" aria-labelledby="game-title">
+        <div class="game-title-row">
+          <div>
+            <span class="eyebrow">PERFORMANCE WEB BUILD</span>
+            <h2 id="game-title">Collect. Unlock. Escape.</h2>
+          </div>
+          <span class="quality-pill">Low graphics</span>
+        </div>
+
+        <div id="unity-container">
+          <canvas
+            id="unity-canvas"
+            width="960"
+            height="540"
+            tabindex="-1"
+            aria-label="Realmaze game canvas"
+          ></canvas>
+
+          <div id="unity-loading-bar" aria-live="polite">
+            <div class="loading-name">REALMAZE</div>
+            <div id="unity-loading-text">Downloading game... 0%</div>
+            <div
+              id="unity-progress"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div id="unity-progress-fill"></div>
+            </div>
+          </div>
+
+          <div id="unity-warning" aria-live="assertive" hidden></div>
+        </div>
+
+        <div class="game-footer">
+          <span>960 × 540 internal render target</span>
+          <button
+            id="unity-fullscreen-button"
+            class="shell-button"
+            type="button"
+            disabled
+          >Fullscreen</button>
+        </div>
+
+        <p class="hint">
+          WASD / Arrows to move · Mouse to look · Space to jump · Shift to sprint
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <span>Desktop browser recommended</span>
+      <a
+        href="https://github.com/MasterChiefProject/Realmaze"
+        target="_blank"
+        rel="noreferrer"
+      >GitHub</a>
+    </footer>
+
+    <script>
+      const canvas = document.querySelector("#unity-canvas");
+      const loadingBar = document.querySelector("#unity-loading-bar");
+      const loadingText = document.querySelector("#unity-loading-text");
+      const progress = document.querySelector("#unity-progress");
+      const progressFill = document.querySelector("#unity-progress-fill");
+      const fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      const warning = document.querySelector("#unity-warning");
+
+      function unityShowBanner(message, type) {
+        const notice = document.createElement("div");
+        notice.className = type === "error"
+          ? "unity-notice error"
+          : "unity-notice warning";
+        notice.textContent = message;
+        warning.appendChild(notice);
+        warning.hidden = false;
+
+        if (type !== "error") {
+          window.setTimeout(() => {
+            notice.remove();
+            warning.hidden = warning.children.length === 0;
+          }, 5000);
+        }
+      }
+
+      const buildUrl = "Build";
+      const loaderUrl = buildUrl + "/RealmazeWebGLStaging.loader.js";
+
+      const config = {
+        arguments: [],
+        dataUrl: buildUrl + "/RealmazeWebGLStaging.data.unityweb",
+        frameworkUrl: buildUrl + "/RealmazeWebGLStaging.framework.js.unityweb",
+        codeUrl: buildUrl + "/RealmazeWebGLStaging.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Realmaze",
+        productVersion: "0.1.0",
+        showBanner: unityShowBanner,
+
+        // Keep the GPU workload predictable even on Retina and 4K displays.
+        devicePixelRatio: 1,
+        matchWebGLToCanvasSize: false,
+      };
+
+      loadingBar.hidden = false;
+
+      const loader = document.createElement("script");
+      loader.src = loaderUrl;
+
+      loader.onload = () => {
+        createUnityInstance(canvas, config, value => {
+          const percent = Math.round(value * 100);
+          progressFill.style.width = percent + "%";
+          progress.setAttribute("aria-valuenow", String(percent));
+          loadingText.textContent = "Downloading game... " + percent + "%";
+        }).then(unityInstance => {
+          loadingBar.hidden = true;
+          fullscreenButton.disabled = false;
+          fullscreenButton.addEventListener(
+            "click",
+            () => unityInstance.SetFullscreen(1)
+          );
+        }).catch(error => {
+          loadingBar.hidden = true;
+          unityShowBanner(String(error), "error");
+        });
+      };
+
+      loader.onerror = () => {
+        loadingBar.hidden = true;
+        unityShowBanner(
+          "The Realmaze WebGL loader could not be downloaded.",
+          "error"
+        );
+      };
+
+      document.body.appendChild(loader);
+    </script>
+  </body>
+</html>

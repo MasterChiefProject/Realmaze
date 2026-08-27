@@ -1,0 +1,41 @@
+name: Repository checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Static production checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout only files needed for static validation
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            README.md
+            ASSET-NOTICE.md
+            Assets/Editor
+            Assets/Scripts/Chest.cs
+            Assets/Scripts/WebGLPerformanceBootstrap.cs
+            Assets/WebGLTemplates
+            ProjectSettings/ProjectVersion.txt
+            tests
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check web shell JavaScript
+        run: node --check Assets/WebGLTemplates/Realmaze/TemplateData/shell.js
+
+      - name: Run repository tests
+        run: node --test tests/repository.test.mjs

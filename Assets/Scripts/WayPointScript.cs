@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
-[RequireComponent(typeof(CapsuleCollider))] // gives them a physical body
+[RequireComponent(typeof(CapsuleCollider))]
 public class WayPointScript : MonoBehaviour
 {
     [Header("Way-points")]
@@ -10,7 +10,7 @@ public class WayPointScript : MonoBehaviour
     [Header("Movement")]
     public float speed = 3f;
     public float staySeconds = 1f;
-    public float rotationSpeed = 180f; // deg/s
+    public float rotationSpeed = 180f;
     public float heightOffset = 0.1f;
     public LayerMask groundLayers = ~0;
 
@@ -20,149 +20,300 @@ public class WayPointScript : MonoBehaviour
     [Range(1f, 60f)] public float maxMoanDelay = 60f;
 
     [Header("Collision-avoidance")]
-    public float avoidRadius = 1.0f;      // how far we “feel” neighbours
-    public float avoidWeight = 1.5f;      // steering strength
-    public LayerMask zombieLayer;         // put zombies in their own layer
+    public float avoidRadius = 1.0f;
+    public float avoidWeight = 1.5f;
+    public LayerMask zombieLayer;
 
-    /* ────────────────────────────────────────── */
-    int currentWp;
-    bool waiting;
-    float waitTimer;
+    private const int AvoidanceBufferSize = 24;
 
-    Animator anim;
-    static readonly int walkHash = Animator.StringToHash("isWalking");
+#if UNITY_WEBGL && !UNITY_EDITOR
+    private const float WebAvoidanceSampleInterval = 0.12f;
+#endif
 
-    AudioSource audioSrc;
-    float moanTimer;
+    private int currentWp;
+    private bool waiting;
+    private float waitTimer;
 
-    CapsuleCollider col;
+    private Animator anim;
+    private static readonly int walkHash =
+        Animator.StringToHash("isWalking");
 
-    /* ────────────────────────────────────────── */
-    void Start()
+    private AudioSource audioSrc;
+    private float moanTimer;
+
+    private CapsuleCollider col;
+    private Terrain activeTerrain;
+
+    // Reused physics buffer removes the array allocation caused by
+    // Physics.OverlapSphere on every zombie every frame.
+    private readonly Collider[] avoidanceBuffer =
+        new Collider[AvoidanceBufferSize];
+
+    private Vector3 cachedAvoidancePush;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    private float nextAvoidanceSampleTime;
+#endif
+
+    private void Start()
     {
         anim = GetComponent<Animator>();
         audioSrc = GetComponent<AudioSource>();
-        col = GetComponent<CapsuleCollider>(); // auto-added by RequireComponent
+        col = GetComponent<CapsuleCollider>();
+        activeTerrain = Terrain.activeTerrain;
 
-        anim.SetBool(walkHash, true);
+        if (waypoints == null || waypoints.Length == 0)
+        {
+            Debug.LogWarning(
+                $"[{nameof(WayPointScript)}] '{name}' has no waypoints. " +
+                "Patrol movement was disabled.",
+                this);
+
+            enabled = false;
+            return;
+        }
+
+        if (anim)
+        {
+            anim.SetBool(walkHash, true);
+        }
 
         ResetMoanTimer();
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // Spread expensive avoidance samples across different frames.
+        nextAvoidanceSampleTime =
+            Time.time + Random.value * WebAvoidanceSampleInterval;
+#endif
     }
 
-    /* ────────────────────────────────────────── */
-    void Update()
+    private void Update()
     {
         HandleMoan();
 
         if (waiting)
         {
             RotateTowardNextWaypoint();
+
             if ((waitTimer -= Time.deltaTime) <= 0f)
             {
                 waiting = false;
-                anim.SetBool(walkHash, true);
+
+                if (anim)
+                {
+                    anim.SetBool(walkHash, true);
+                }
             }
+
             return;
         }
 
         MoveAlongTerrain();
 
-        // arrival test (XZ only)
-        Vector3 flat = waypoints[currentWp].position - transform.position;
-        flat.y = 0;
+        Vector3 flat =
+            waypoints[currentWp].position - transform.position;
+
+        flat.y = 0f;
+
         if (flat.sqrMagnitude < 0.16f)
         {
-            currentWp = (currentWp + 1) % waypoints.Length;
+            currentWp =
+                (currentWp + 1) % waypoints.Length;
+
             waiting = true;
             waitTimer = staySeconds;
-            anim.SetBool(walkHash, false);
+
+            if (anim)
+            {
+                anim.SetBool(walkHash, false);
+            }
         }
     }
 
-    /* ───────────────── helpers ───────────────── */
-
-    void MoveAlongTerrain()
+    private void MoveAlongTerrain()
     {
-        // desired direction
-        Vector3 target = waypoints[currentWp].position;
-        Vector3 dir = new Vector3(target.x - transform.position.x, 0, target.z - transform.position.z).normalized;
+        Vector3 target =
+            waypoints[currentWp].position;
 
-        // add local-avoidance steering
+        Vector3 dir = new Vector3(
+            target.x - transform.position.x,
+            0f,
+            target.z - transform.position.z).normalized;
+
         dir = ApplyAvoidance(dir);
 
-        // step
-        Vector3 step = dir * speed * Time.deltaTime;
-        Vector3 nextXZ = transform.position + step;
+        Vector3 step =
+            dir * speed * Time.deltaTime;
 
-        // stick to ground
-        float groundY = GetGroundHeight(nextXZ);
-        nextXZ.y = groundY + heightOffset;
-        transform.position = nextXZ;
+        Vector3 nextXZ =
+            transform.position + step;
 
-        // face where we’re going
+        float groundY =
+            GetGroundHeight(nextXZ);
+
+        nextXZ.y =
+            groundY + heightOffset;
+
+        transform.position =
+            nextXZ;
+
         if (dir.sqrMagnitude > 0.0001f)
         {
-            Quaternion look = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, look, rotationSpeed * Time.deltaTime);
+            Quaternion look =
+                Quaternion.LookRotation(dir);
+
+            transform.rotation =
+                Quaternion.RotateTowards(
+                    transform.rotation,
+                    look,
+                    rotationSpeed * Time.deltaTime);
         }
     }
 
-    Vector3 ApplyAvoidance(Vector3 desiredDir)
+    private Vector3 ApplyAvoidance(Vector3 desiredDir)
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, avoidRadius, zombieLayer);
-        Vector3 push = Vector3.zero;
-
-        foreach (var h in hits)
+#if UNITY_WEBGL && !UNITY_EDITOR
+        if (Time.time >= nextAvoidanceSampleTime)
         {
-            if (h == col) continue;                       // ignore self
+            cachedAvoidancePush =
+                CalculateAvoidancePush();
 
-            Vector3 away = transform.position - h.transform.position;
-            away.y = 0;
-            float dist = away.magnitude;
-            if (dist > 0.001f)
-                push += away.normalized / dist;          // inverse-distance weighting
+            nextAvoidanceSampleTime =
+                Time.time + WebAvoidanceSampleInterval;
+        }
+#else
+        cachedAvoidancePush =
+            CalculateAvoidancePush();
+#endif
+
+        if (cachedAvoidancePush.sqrMagnitude < 0.000001f)
+        {
+            return desiredDir;
         }
 
-        if (push == Vector3.zero) return desiredDir;
-
-        Vector3 steered = (desiredDir + push * avoidWeight).normalized;
-        return steered;
+        return (
+            desiredDir +
+            cachedAvoidancePush * avoidWeight
+        ).normalized;
     }
 
-    void RotateTowardNextWaypoint()
+    private Vector3 CalculateAvoidancePush()
     {
-        Vector3 toNext = waypoints[currentWp].position - transform.position;
-        toNext.y = 0;
-        if (toNext.sqrMagnitude < 0.001f) return;
+        int hitCount =
+            Physics.OverlapSphereNonAlloc(
+                transform.position,
+                avoidRadius,
+                avoidanceBuffer,
+                zombieLayer);
 
-        Quaternion tgt = Quaternion.LookRotation(toNext);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, tgt, rotationSpeed * Time.deltaTime);
+        Vector3 push =
+            Vector3.zero;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider hit =
+                avoidanceBuffer[i];
+
+            if (!hit || hit == col)
+            {
+                continue;
+            }
+
+            Vector3 away =
+                transform.position -
+                hit.transform.position;
+
+            away.y = 0f;
+
+            float distance =
+                away.magnitude;
+
+            if (distance > 0.001f)
+            {
+                push +=
+                    away.normalized / distance;
+            }
+        }
+
+        return push;
     }
 
-    float GetGroundHeight(Vector3 worldXZ)
+    private void RotateTowardNextWaypoint()
     {
-        if (Terrain.activeTerrain)
-            return Terrain.activeTerrain.SampleHeight(worldXZ) + Terrain.activeTerrain.transform.position.y;
+        Vector3 toNext =
+            waypoints[currentWp].position -
+            transform.position;
 
-        if (Physics.Raycast(worldXZ + Vector3.up * 100f, Vector3.down, out var hit, 200f, groundLayers))
+        toNext.y = 0f;
+
+        if (toNext.sqrMagnitude < 0.001f)
+        {
+            return;
+        }
+
+        Quaternion targetRotation =
+            Quaternion.LookRotation(toNext);
+
+        transform.rotation =
+            Quaternion.RotateTowards(
+                transform.rotation,
+                targetRotation,
+                rotationSpeed * Time.deltaTime);
+    }
+
+    private float GetGroundHeight(Vector3 worldXZ)
+    {
+        if (activeTerrain)
+        {
+            return
+                activeTerrain.SampleHeight(worldXZ) +
+                activeTerrain.transform.position.y;
+        }
+
+        if (Physics.Raycast(
+                worldXZ + Vector3.up * 100f,
+                Vector3.down,
+                out RaycastHit hit,
+                200f,
+                groundLayers))
+        {
             return hit.point.y;
+        }
 
         return worldXZ.y;
     }
 
-    /* ───────────── zombie moan logic ─────────── */
-    void HandleMoan()
+    private void HandleMoan()
     {
-        if (moanClips.Length == 0) return;
+        if (moanClips == null ||
+            moanClips.Length == 0 ||
+            !audioSrc)
+        {
+            return;
+        }
 
         if ((moanTimer -= Time.deltaTime) <= 0f)
         {
-            AudioClip clip = moanClips[Random.Range(0, moanClips.Length)];
-            audioSrc.PlayOneShot(clip);
+            AudioClip clip =
+                moanClips[
+                    Random.Range(
+                        0,
+                        moanClips.Length)];
+
+            if (clip)
+            {
+                audioSrc.PlayOneShot(clip);
+            }
+
             ResetMoanTimer();
         }
     }
 
-    void ResetMoanTimer() =>
-        moanTimer = Random.Range(minMoanDelay, maxMoanDelay);
+    private void ResetMoanTimer()
+    {
+        moanTimer =
+            Random.Range(
+                minMoanDelay,
+                maxMoanDelay);
+    }
 }
