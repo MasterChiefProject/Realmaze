@@ -12,52 +12,89 @@ public class Chest : MonoBehaviour
     public Key key;
     public float volume = 1f;
 
-    Animation openChestAnimation;
+    private Animation openChestAnimation;
+    private bool isOpening;
 
     private void Start()
     {
-        notEnoughCoinsMessage.gameObject.SetActive(false);
+        if (notEnoughCoinsMessage)
+        {
+            notEnoughCoinsMessage.gameObject.SetActive(false);
+        }
+
         openChestAnimation = GetComponent<Animation>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player") || isOpen || isOpening)
         {
-            if (Globals.points >= openAfterCoins && !isOpen)
-            {
-                openChestAnimation.Play();
-                AudioSource.PlayClipAtPoint(openChestSound, transform.position, volume);
-                if (!Globals.hasKey)
-                {
-                    StartCoroutine(KeyAfterDelay(keyDelay));
-                }
-            }
-            else
-            {
-                if (!isOpen)
-                {
-                    int coinsLack = openAfterCoins -  Globals.points;
-                    notEnoughCoinsMessage.text = "You don't have enough coins to open the chest.\nCollect " + coinsLack + " more coins.";
-                    notEnoughCoinsMessage.gameObject.SetActive(true);
-                }
-            }
+            return;
         }
+
+        if (Globals.points < openAfterCoins)
+        {
+            ShowMissingCoinsMessage();
+            return;
+        }
+
+        isOpening = true;
+
+        if (notEnoughCoinsMessage)
+        {
+            notEnoughCoinsMessage.gameObject.SetActive(false);
+        }
+
+        if (openChestAnimation)
+        {
+            openChestAnimation.Play();
+        }
+
+        if (openChestSound)
+        {
+            AudioSource.PlayClipAtPoint(
+                openChestSound,
+                transform.position,
+                volume);
+        }
+
+        StartCoroutine(OpenAfterDelay(keyDelay));
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && notEnoughCoinsMessage)
         {
             notEnoughCoinsMessage.gameObject.SetActive(false);
         }
     }
 
-    private IEnumerator KeyAfterDelay(float delay)
+    private void ShowMissingCoinsMessage()
     {
-        yield return new WaitForSeconds(delay);
-        key.PlayKeyAnimation();
-        isOpen = true;
+        if (!notEnoughCoinsMessage)
+        {
+            return;
+        }
+
+        int missingCoins = Mathf.Max(0, openAfterCoins - Globals.points);
+
+        notEnoughCoinsMessage.text =
+            $"You don't have enough coins to open the chest.\\n" +
+            $"Collect {missingCoins} more coins.";
+
+        notEnoughCoinsMessage.gameObject.SetActive(true);
     }
 
+    private IEnumerator OpenAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (!Globals.hasKey && key)
+        {
+            key.PlayKeyAnimation();
+        }
+
+        isOpen = true;
+        isOpening = false;
+    }
 }

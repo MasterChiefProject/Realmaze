@@ -24,6 +24,10 @@ jobs:
             ASSET-NOTICE.md
             Assets/Editor
             Assets/Scripts/Chest.cs
+            Assets/Scripts/Key.cs
+            Assets/Scripts/MainMenu.cs
+            Assets/Scripts/PlayerDeathHandler.cs
+            Assets/Scripts/WayPointScript.cs
             Assets/Scripts/WebGLPerformanceBootstrap.cs
             Assets/WebGLTemplates
             ProjectSettings/ProjectVersion.txt
@@ -38,4 +42,4 @@ jobs:
         run: node --check Assets/WebGLTemplates/Realmaze/TemplateData/shell.js
 
       - name: Run repository tests
-        run: node --test tests/repository.test.mjs
+        run: node --test tests/*.test.mjs

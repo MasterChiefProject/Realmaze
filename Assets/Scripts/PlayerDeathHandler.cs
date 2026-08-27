@@ -1,62 +1,79 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine;
 
-/// Attach to the player root object.           
-/// Requires that every zombie collider carries the tag stored in `zombieTag` (default "Zombie").
 public class PlayerDeathHandler : MonoBehaviour
 {
     [Header("References")]
-    [Tooltip("Movement / controller script that should be disabled on death " +
-             "(e.g. StarterAssets.FirstPersonController).")]
-    [SerializeField] MonoBehaviour movementScript;
+    [Tooltip("Movement/controller component that should be disabled on death.")]
+    [SerializeField] private MonoBehaviour movementScript;
 
     [Tooltip("Canvas or panel that contains the Game-Over UI.")]
-    [SerializeField] GameObject gameOverUI;
+    [SerializeField] private GameObject gameOverUI;
 
-    [Tooltip("Optional: the player’s rigidbody (will be frozen on death).")]
-    [SerializeField] Rigidbody rb;
+    [Tooltip("Optional player Rigidbody to freeze on death.")]
+    [SerializeField] private Rigidbody rb;
 
     [Header("Settings")]
     [Tooltip("Tag that identifies zombie trigger colliders.")]
-    [SerializeField] string zombieTag = "Zombie";
+    [SerializeField] private string zombieTag = "Zombie";
 
-    bool isDead = false;
+    private bool isDead;
 
-    void Awake()
+    private void Awake()
     {
-        // Convenience—fill refs automatically if you forgot in the Inspector
-        if (!movementScript) movementScript = GetComponent<MonoBehaviour>();
-        if (!rb) rb = GetComponent<Rigidbody>();
-        if (gameOverUI) gameOverUI.SetActive(false);     // hide at start
+        if (!rb)
+        {
+            rb = GetComponent<Rigidbody>();
+        }
+
+        if (!movementScript)
+        {
+            Debug.LogWarning(
+                $"[{nameof(PlayerDeathHandler)}] No movement script is assigned. " +
+                "The Game Over UI will still work, but player movement cannot " +
+                "be disabled automatically.",
+                this);
+        }
+
+        if (gameOverUI)
+        {
+            gameOverUI.SetActive(false);
+        }
     }
 
-    /* ------------------------------------------------------------ */
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        if (isDead || gameObject.tag == zombieTag) return;                    // already dead, ignore further hits
-        if (!other.CompareTag(zombieTag)) return;
+        if (isDead ||
+            CompareTag(zombieTag) ||
+            !other.CompareTag(zombieTag))
+        {
+            return;
+        }
 
         Die();
     }
 
-    /* ------------------------------------------------------------ */
-    void Die()
+    private void Die()
     {
         isDead = true;
 
-        // 1️⃣  Freeze / stop player control
-        if (movementScript) movementScript.enabled = false;
-        if (rb) rb.constraints = RigidbodyConstraints.FreezeAll;
+        if (movementScript)
+        {
+            movementScript.enabled = false;
+        }
 
-        // 2️⃣  Untag so other scripts don’t treat us as a living player
+        if (rb)
+        {
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+        }
+
         gameObject.tag = "Untagged";
 
-        // 3️⃣  Show the Game-Over canvas
-        if (gameOverUI) gameOverUI.SetActive(true);
+        if (gameOverUI)
+        {
+            gameOverUI.SetActive(true);
+        }
 
-        // Optional quality-of-life tweaks
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        // Time.timeScale  = 0f;   // uncomment if you want to pause the whole game
     }
 }

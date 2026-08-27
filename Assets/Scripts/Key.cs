@@ -13,37 +13,88 @@ public class Key : MonoBehaviour
     public Text message;
     public float hideMsgAfterDelay = 2f;
 
-    private Animation animation;
+    private Animation keyAnimation;
+    private Collider keyCollider;
+    private Renderer[] keyRenderers;
+    private bool isCollected;
 
-    private void Start()
+    private void Awake()
     {
-        animation = GetComponent<Animation>();
+        keyAnimation = GetComponent<Animation>();
+        keyCollider = GetComponent<Collider>();
+        keyRenderers = GetComponentsInChildren<Renderer>(true);
     }
 
     public void PlayKeyAnimation()
     {
-        animation.Play();
+        if (keyAnimation)
+        {
+            keyAnimation.Play();
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && chest.isOpen)
+        if (isCollected ||
+            !other.CompareTag("Player") ||
+            !chest ||
+            !chest.isOpen)
         {
-            Globals.hasKey = true;
-            gate1.UnlockGate();
-            gate2.UnlockGate();
-            AudioSource.PlayClipAtPoint(takeKeyAudio, transform.position, volume);
+            return;
+        }
 
+        isCollected = true;
+        Globals.hasKey = true;
+
+        if (gate1)
+        {
+            gate1.UnlockGate();
+        }
+
+        if (gate2)
+        {
+            gate2.UnlockGate();
+        }
+
+        if (takeKeyAudio)
+        {
+            AudioSource.PlayClipAtPoint(
+                takeKeyAudio,
+                transform.position,
+                volume);
+        }
+
+        if (message)
+        {
             message.text = "Now you can open the gate!";
             message.gameObject.SetActive(true);
-
-            Destroy(gameObject);
         }
+
+        if (keyCollider)
+        {
+            keyCollider.enabled = false;
+        }
+
+        foreach (Renderer keyRenderer in keyRenderers)
+        {
+            if (keyRenderer)
+            {
+                keyRenderer.enabled = false;
+            }
+        }
+
+        StartCoroutine(FinishCollection());
     }
 
-    private IEnumerator HideMessageAfterDelay(float delay)
+    private IEnumerator FinishCollection()
     {
-        yield return new WaitForSeconds(delay);
-        message.gameObject.SetActive(false);
+        yield return new WaitForSeconds(Mathf.Max(0f, hideMsgAfterDelay));
+
+        if (message)
+        {
+            message.gameObject.SetActive(false);
+        }
+
+        Destroy(gameObject);
     }
 }
