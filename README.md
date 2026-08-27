@@ -33,8 +33,10 @@ The project includes collectible state, gated progression, enemy patrol behavior
 | Look | Mouse |
 | Jump | `Space` |
 | Sprint | `Left Shift` |
-| Crouch | `C` |
-| Interact | `E` |
+| Crouch | `Left Ctrl` |
+| Zoom | Right Mouse Button |
+
+World interactions such as collecting coins, taking the key, opening the chest, and reaching the escape zone are trigger-based.
 
 The WebGL build is designed primarily for desktop browsers with a keyboard and mouse.
 
@@ -81,7 +83,6 @@ Realmaze/
 ├── Packages/
 ├── ProjectSettings/
 ├── tests/
-│   └── repository.test.mjs
 ├── ASSET-NOTICE.md
 └── README.md
 ```
@@ -148,11 +149,12 @@ The command:
 
 - switches to the WebGL target if required
 - builds exactly the two production scenes
+- applies production metadata (`MasterChiefProject`, `Realmaze`, `1.0.0`)
 - applies the browser-performance profile only for the duration of the build
 - builds into the ignored `Builds/RealmazeWebGLStaging/` staging directory
 - replaces `docs/` only after a successful build
 - writes `docs/.nojekyll`
-- restores the original project and quality settings afterward
+- restores the original quality settings afterward
 
 It does not use `CleanBuildCache`, so keeping the local `Library/` directory allows Unity to reuse its normal build/import caches.
 
@@ -192,11 +194,11 @@ The repository includes lightweight automated checks that do not require a Unity
 Run them locally with:
 
 ```powershell
-node --test tests/repository.test.mjs
+node --test tests/*.test.mjs
 node --check Assets\WebGLTemplates\Realmaze\TemplateData\shell.js
 ```
 
-The checks validate the Unity version, production scenes, WebGL build policy, low-resolution web shell, theme persistence, WebGL-only performance bootstrap, and known source-safety invariants.
+The checks validate the Unity version, production scenes, WebGL build policy, production metadata, low-resolution web shell, theme persistence, WebGL-only performance bootstrap, gate physics safeguards, and known gameplay/source invariants.
 
 Unity Editor compilation and a Play Mode smoke test remain the final validation for game behavior.
 

@@ -122,6 +122,10 @@ public static class RealmazeWebGLBuild
     {
         NamedBuildTarget web = NamedBuildTarget.WebGL;
 
+        PlayerSettings.companyName = "MasterChiefProject";
+        PlayerSettings.productName = "Realmaze";
+        PlayerSettings.bundleVersion = "1.0.0";
+
         PlayerSettings.WebGL.template = "PROJECT:Realmaze";
         PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
         PlayerSettings.WebGL.decompressionFallback = true;
@@ -237,12 +241,6 @@ public static class RealmazeWebGLBuild
         }
     }
 
-    /// <summary>
-    /// Temporarily makes every quality level use the project's existing
-    /// Mobile URP asset and a 2-level mip limit. This lets WebGL mip stripping
-    /// omit high-resolution texture mips and avoids shipping PC URP variants.
-    /// The Editor/project settings are restored after the build.
-    /// </summary>
     private sealed class WebBuildQualityScope : IDisposable
     {
         private readonly int originalQualityLevel;
