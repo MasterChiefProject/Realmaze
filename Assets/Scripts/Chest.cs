@@ -79,7 +79,7 @@ public class Chest : MonoBehaviour
         int missingCoins = Mathf.Max(0, openAfterCoins - Globals.points);
 
         notEnoughCoinsMessage.text =
-            $"You don't have enough coins to open the chest.\\n" +
+            $"You don't have enough coins to open the chest.\n" +
             $"Collect {missingCoins} more coins.";
 
         notEnoughCoinsMessage.gameObject.SetActive(true);

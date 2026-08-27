@@ -20,6 +20,7 @@ jobs:
           lfs: false
           sparse-checkout-cone-mode: false
           sparse-checkout: |
+            .github/workflows/ci.yml
             README.md
             ASSET-NOTICE.md
             Assets/Editor

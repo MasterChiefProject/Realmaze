@@ -12,12 +12,13 @@ function read(relativePath) {
 test("CI sparse checkout includes scripts required by repository tests", () => {
   const workflow = read(".github/workflows/ci.yml");
 
-  for (const script of [
+  for (const requiredPath of [
+    ".github/workflows/ci.yml",
     "Assets/Scripts/MainMenu.cs",
     "Assets/Scripts/WayPointScript.cs",
     "Assets/Scripts/WebGLPerformanceBootstrap.cs",
   ]) {
-    assert.ok(workflow.includes(script));
+    assert.ok(workflow.includes(requiredPath));
   }
 });
 
@@ -28,9 +29,14 @@ test("chest guards against duplicate opening coroutines", () => {
   assert.match(chest, /isOpening = true/);
 });
 
-test("chest message uses an escaped newline", () => {
+test("chest message uses a real C# newline escape, not a literal backslash-n", () => {
   const chest = read("Assets/Scripts/Chest.cs");
-  assert.match(chest, /\\n/);
+
+  const correct = 'open the chest.\\n" +';
+  const incorrect = 'open the chest.\\\\n" +';
+
+  assert.ok(chest.includes(correct));
+  assert.ok(!chest.includes(incorrect));
 });
 
 test("key collection is single-shot and hides the message before destroy", () => {
@@ -45,4 +51,3 @@ test("death handler does not guess an arbitrary MonoBehaviour", () => {
   const death = read("Assets/Scripts/PlayerDeathHandler.cs");
   assert.doesNotMatch(death, /GetComponent<MonoBehaviour>/);
 });
-
