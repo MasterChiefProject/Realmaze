@@ -1,6 +1,5 @@
 # Realmaze
 
-[![Repository checks](https://github.com/MasterChiefProject/Realmaze/actions/workflows/ci.yml/badge.svg)](https://github.com/MasterChiefProject/Realmaze/actions/workflows/ci.yml)
 [![Unity](https://img.shields.io/badge/Unity-6000.0.47f1-black?logo=unity)](https://unity.com/)
 [![WebGL](https://img.shields.io/badge/WebGL-browser%20build-5b7fff)](https://masterchiefproject.github.io/Realmaze/)
 
@@ -79,9 +78,6 @@ Realmaze combines several small gameplay systems:
 
 ```text
 Realmaze/
-├── .github/
-│   └── workflows/
-│       └── ci.yml
 ├── Assets/
 │   ├── Editor/
 │   │   └── RealmazeWebGLBuild.cs
@@ -94,7 +90,6 @@ Realmaze/
 │       └── Realmaze/
 ├── Packages/
 ├── ProjectSettings/
-├── tests/
 ├── ASSET-NOTICE.md
 └── README.md
 ```
@@ -182,30 +177,6 @@ http://localhost:8000/
 ```
 
 This mirrors the hosting model used by GitHub Pages and allows the WebAssembly and compressed Unity assets to load normally.
-
-## Automated checks
-
-The repository includes static production checks that run without a Unity license on GitHub Actions.
-
-Local verification:
-
-```powershell
-node --test tests/*.test.mjs
-node --check Assets\WebGLTemplates\Realmaze\TemplateData\shell.js
-```
-
-The checks cover:
-
-- Unity version
-- production scene selection
-- WebGL build configuration
-- project metadata
-- browser-shell resolution and theme persistence
-- WebGL performance bootstrap
-- gate physics safeguards
-- known gameplay/source invariants
-
-Unity compilation and Play Mode remain the final validation layer for scene serialization and runtime behavior.
 
 ## Deployment
 
