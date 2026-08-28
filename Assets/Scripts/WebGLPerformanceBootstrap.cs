@@ -5,9 +5,9 @@ using UnityEngine.SceneManagement;
 
 internal static class WebGLPerformanceBootstrap
 {
-    private const float WebFarClipDistance = 100f;
+	private const float WebFarClipDistance = 50f;
     private const float WebTerrainDetailDistance = 22f;
-    private const float WebTerrainTreeDistance = 85f;
+    private const float WebTerrainTreeDistance = 50f;
     private const float WebTerrainBillboardDistance = 25f;
     private const float WebTerrainBasemapDistance = 45f;
 
